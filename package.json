@@ -1,0 +1,33 @@
+{
+  "name": "zentube",
+  "version": "1.0.0",
+  "description": "High-performance streaming media and metadata extractor inspired by NewPipe",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "bin": {
+    "zentube": "./bin/zentube.js"
+  },
+  "scripts": {
+    "dev": "npm --prefix fluxa run dev",
+    "build": "npm --prefix fluxa run build",
+    "fluxa:dev": "npm --prefix fluxa run dev",
+    "fluxa:build": "npm --prefix fluxa run build",
+    "start": "node --experimental-strip-types server.ts",
+    "test": "node --experimental-strip-types test/zentube.test.ts",
+    "cli": "node bin/zentube.js"
+  },
+  "keywords": [
+    "zentube",
+    "newpipe",
+    "extractor",
+    "youtube",
+    "innertube",
+    "streaming",
+    "media-extractor",
+    "dash",
+    "hls"
+  ],
+  "author": "ZenTube Team",
+  "license": "GPL-3.0"
+}
