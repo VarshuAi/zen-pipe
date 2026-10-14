@@ -114,6 +114,25 @@ export class TranscriptExtractor {
     return '';
   }
 
+  /**
+   * Converts timestamped transcript segments directly to standard SRT subtitle text
+   */
+  public static transcriptToSrt(segments: TranscriptSegment[]): string {
+    let srt = '';
+    let index = 1;
+
+    for (const seg of segments) {
+      const startMs = seg.startMs || 0;
+      const endMs = startMs + (seg.durationMs || 2000);
+
+      srt += `${index++}\n`;
+      srt += `${this.formatSrtTime(startMs)} --> ${this.formatSrtTime(endMs)}\n`;
+      srt += `${seg.text}\n\n`;
+    }
+
+    return srt;
+  }
+
   private static formatSrtTime(ms: number): string {
     const hrs = Math.floor(ms / 3600000);
     const mins = Math.floor((ms % 3600000) / 60000);

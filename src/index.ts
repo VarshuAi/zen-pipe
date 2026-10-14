@@ -144,6 +144,13 @@ export class ZenTube {
   }
 
   /**
+   * Converts transcript segments to standard SRT subtitle text
+   */
+  public static transcriptToSrt(segments: any[]) {
+    return TranscriptExtractor.transcriptToSrt(segments);
+  }
+
+  /**
    * Extracts the YouTube Shorts feed
    */
   public static async getShorts(channelOrQueryOrToken?: string, continuationToken?: string) {
