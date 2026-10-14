@@ -9,10 +9,11 @@
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Node.js 22 | 24](https://img.shields.io/badge/node.js-22%20%7C%2024-brightgreen.svg)](https://nodejs.org)
 [![NPM Dependencies](https://img.shields.io/badge/dependencies-0-success.svg)](https://github.com/VarshuAi/zen-pipe)
-[![Tests Passing](https://img.shields.io/badge/tests-98%2F98%20passing-brightgreen.svg)](https://github.com/VarshuAi/zen-pipe)
+[![Tests Passing](https://img.shields.io/badge/tests-102%2F102%20passing-brightgreen.svg)](https://github.com/VarshuAi/zen-pipe)
+[![Vercel Deployment](https://img.shields.io/badge/vercel-deployed-black.svg?logo=vercel)](https://zen-pipe.vercel.app/)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://github.com/VarshuAi/zen-pipe)
 
-[**Explore Live Web App**](http://localhost:3333) • [**CLI Guide**](#-cli-usage) • [**Architecture**](#-architecture) • [**Docker Self-Hosting**](#-docker--self-hosting) • [**Contributing**](./CONTRIBUTING.md)
+[**Explore Live Web App (Vercel)**](https://zen-pipe.vercel.app/) • [**CLI Guide**](#-cli-usage) • [**Architecture**](#-architecture) • [**Cloud & Vercel Deployment**](#-cloud-deployment--cookie-configuration) • [**Docker Self-Hosting**](#-docker--self-hosting) • [**Contributing**](./CONTRIBUTING.md)
 
 </div>
 
@@ -201,6 +202,31 @@ Verify container health:
 curl http://localhost:3333/health
 # Response: {"status":"healthy","uptime":12.4,"version":"1.0.0"}
 ```
+
+---
+
+## 🚀 Cloud Deployment & Cookie Configuration
+
+ZenPipe is designed to run seamlessly both in local desktop/home server environments and on serverless cloud platforms like **Vercel**, **AWS Lambda**, **Render**, or **Railway**.
+
+### Datacenter Anti-Bot Mitigation & Fallback Strategy
+
+Google strictly restricts anonymous `/player` calls originating from commercial cloud datacenter IP subnets (AWS, GCP, Azure, Vercel) with `LOGIN_REQUIRED: Sign in to confirm you’re not a bot`. ZenPipe implements a 3-tier resilient failover architecture:
+
+1. **Client Cascading (Tier 1)**: First queries Apple VisionOS (`visionOS 26.6`) for unthrottled streams, immediately falling back to Android (`21.26.364`) and iOS (`21.26.4`) payloads.
+2. **Federated Mirrors (Tier 2)**: Automatic failover across registered Invidious and Piped instances sorted by lowest latency.
+3. **Graceful Embedded Player Failover (Tier 3)**: If datacenter IP challenges occur and mirrors are unreachable, ZenPipe automatically returns rich video metadata alongside an ad-free, tracking-free `youtube-nocookie.com` embed player inside the custom ZenPipe shell. Playback **never breaks** with 500 errors.
+
+### Unlocking Direct 4K Streams on Cloud Deployments
+
+To bypass cloud datacenter challenges and unlock full, direct unthrottled 4K/1080p native stream formats on Vercel or Docker cloud servers:
+
+1. Export YouTube cookies from a standard or throwaway Google account using a browser extension like *Get cookies.txt LOCALLY*.
+2. Add the environment variable in your cloud deployment settings (e.g., **Vercel Dashboard &rarr; Project Settings &rarr; Environment Variables**):
+   ```ini
+   YOUTUBE_COOKIES="VISITOR_INFO1_LIVE=...; PREF=...; SID=...; HSID=...;"
+   ```
+3. ZenPipe's `HttpClient` automatically detects `process.env.YOUTUBE_COOKIES` and authenticates all outgoing InnerTube requests.
 
 ---
 
