@@ -17,6 +17,7 @@ export interface InnerTubeClientContext {
   deviceModel?: string;
   osName?: string;
   osVersion?: string;
+  androidSdkVersion?: number;
   hl?: string;
   gl?: string;
 }
@@ -40,20 +41,24 @@ export const CLIENT_CONSTANTS = {
     USER_AGENT: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
   },
 
-  // Android Client
+  // Android Client - Modern InnerTube payload to bypass bot checks & datacenter blocks
   ANDROID: {
     NAME: 'ANDROID',
-    VERSION: '19.45.38',
+    VERSION: '21.26.364',
     ID: '3',
-    USER_AGENT: 'com.google.android.youtube/19.45.38 (Linux; U; Android 14; en_US; Pixel 8 Pro)',
+    SDK_VERSION: 30,
+    OS_VERSION: '11',
+    USER_AGENT: 'com.google.android.youtube/21.26.364 (Linux; U; Android 11) gzip',
   },
 
   // iOS Client
   IOS: {
     NAME: 'IOS',
-    VERSION: '19.45.4',
+    VERSION: '21.26.4',
     ID: '5',
-    USER_AGENT: 'com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_0 like Mac OS X; en_US)',
+    DEVICE_MODEL: 'iPhone16,2',
+    OS_VERSION: '18.3.2.22D82',
+    USER_AGENT: 'com.google.ios.youtube/21.26.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)',
   },
 
   // TV / Cobalt Client
@@ -130,6 +135,65 @@ export class InnerTubeClient {
       'Referer': 'https://www.youtube.com',
       'X-YouTube-Client-Name': CLIENT_CONSTANTS.WEB.ID,
       'X-YouTube-Client-Version': CLIENT_CONSTANTS.WEB.VERSION,
+    };
+  }
+
+  /**
+   * Builds the Android client context for stream playback extraction
+   */
+  public static createAndroidContext(visitorData: string): InnerTubeClientContext {
+    return {
+      clientName: CLIENT_CONSTANTS.ANDROID.NAME,
+      clientVersion: CLIENT_CONSTANTS.ANDROID.VERSION,
+      clientId: CLIENT_CONSTANTS.ANDROID.ID,
+      clientScreen: 'WATCH',
+      visitorData,
+      platform: 'MOBILE',
+      osName: 'Android',
+      osVersion: CLIENT_CONSTANTS.ANDROID.OS_VERSION,
+      androidSdkVersion: CLIENT_CONSTANTS.ANDROID.SDK_VERSION,
+      hl: 'en',
+      gl: 'US',
+    };
+  }
+
+  /**
+   * Headers for Android player requests
+   */
+  public static getAndroidHeaders(): Record<string, string> {
+    return {
+      'User-Agent': CLIENT_CONSTANTS.ANDROID.USER_AGENT,
+      'X-Goog-Api-Format-Version': '2',
+    };
+  }
+
+  /**
+   * Builds the iOS client context for stream playback extraction
+   */
+  public static createIosContext(visitorData: string): InnerTubeClientContext {
+    return {
+      clientName: CLIENT_CONSTANTS.IOS.NAME,
+      clientVersion: CLIENT_CONSTANTS.IOS.VERSION,
+      clientId: CLIENT_CONSTANTS.IOS.ID,
+      clientScreen: 'WATCH',
+      visitorData,
+      platform: 'MOBILE',
+      deviceMake: 'Apple',
+      deviceModel: CLIENT_CONSTANTS.IOS.DEVICE_MODEL,
+      osName: 'iOS',
+      osVersion: CLIENT_CONSTANTS.IOS.OS_VERSION,
+      hl: 'en',
+      gl: 'US',
+    };
+  }
+
+  /**
+   * Headers for iOS player requests
+   */
+  public static getIosHeaders(): Record<string, string> {
+    return {
+      'User-Agent': CLIENT_CONSTANTS.IOS.USER_AGENT,
+      'X-Goog-Api-Format-Version': '2',
     };
   }
 

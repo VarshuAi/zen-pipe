@@ -32,21 +32,8 @@ export class StreamExtractor {
 
     const visitorData = await HttpClient.getVisitorData();
 
-    // 1. Fetch Streaming Formats using VisionOS client (highest playback reliability)
-    const visionContext = InnerTubeClient.createVisionOsContext(visitorData);
-    const playerPromise = HttpClient.postJson(
-      `${InnerTubeClient.ENDPOINTS.PLAYER}?prettyPrint=false&id=${videoId}`,
-      InnerTubeClient.preparePlayerBody(videoId, visionContext),
-      { headers: InnerTubeClient.getVisionOsHeaders() }
-    ).catch(async () => {
-      // Fallback: Web player
-      const webContext = InnerTubeClient.createWebContext(visitorData);
-      return HttpClient.postJson(
-        `${InnerTubeClient.ENDPOINTS.WEB_PLAYER}?prettyPrint=false`,
-        InnerTubeClient.preparePlayerBody(videoId, webContext),
-        { headers: InnerTubeClient.getWebHeaders() }
-      );
-    });
+    // 1. Fetch Streaming Formats using client cascading (VisionOS -> Android -> iOS -> Web)
+    const playerPromise = this.fetchPlayerData(videoId, visitorData);
 
     // 2. Fetch Metadata, Chapters, and Related Videos using Web client
     const webContext = InnerTubeClient.createWebContext(visitorData);
@@ -110,6 +97,75 @@ export class StreamExtractor {
       hlsManifestUrl: streamingData.hlsManifestUrl,
       relatedVideos,
     };
+  }
+
+  /**
+   * Fetches player data with client cascading:
+   * VisionOS -> Android -> iOS -> Web
+   * Ensures uninterrupted playback even on cloud datacenter IPs (Vercel, AWS, Azure, CI)
+   */
+  private static async fetchPlayerData(videoId: string, visitorData: string): Promise<any> {
+    const clientsToTry = [
+      {
+        name: 'VISIONOS',
+        context: InnerTubeClient.createVisionOsContext(visitorData),
+        headers: InnerTubeClient.getVisionOsHeaders(),
+        endpoint: `${InnerTubeClient.ENDPOINTS.PLAYER}?prettyPrint=false&id=${videoId}`,
+      },
+      {
+        name: 'ANDROID',
+        context: InnerTubeClient.createAndroidContext(visitorData),
+        headers: InnerTubeClient.getAndroidHeaders(),
+        endpoint: `${InnerTubeClient.ENDPOINTS.PLAYER}?prettyPrint=false&id=${videoId}`,
+      },
+      {
+        name: 'IOS',
+        context: InnerTubeClient.createIosContext(visitorData),
+        headers: InnerTubeClient.getIosHeaders(),
+        endpoint: `${InnerTubeClient.ENDPOINTS.PLAYER}?prettyPrint=false&id=${videoId}`,
+      },
+      {
+        name: 'WEB',
+        context: InnerTubeClient.createWebContext(visitorData),
+        headers: InnerTubeClient.getWebHeaders(),
+        endpoint: `${InnerTubeClient.ENDPOINTS.WEB_PLAYER}?prettyPrint=false`,
+      },
+    ];
+
+    let lastData: any = null;
+    let lastError: any = null;
+
+    for (const client of clientsToTry) {
+      try {
+        const body = InnerTubeClient.preparePlayerBody(videoId, client.context);
+        const data = await HttpClient.postJson(client.endpoint, body, { headers: client.headers });
+        lastData = data;
+
+        const playability = data?.playabilityStatus;
+        const status = playability?.status;
+
+        // If age-restricted or private, don't cascade further - it is an explicit video status
+        const reason = (playability?.reason || '').toLowerCase();
+        if (reason.includes('age-restricted') || reason.includes('inappropriate') || reason.includes('private')) {
+          return data;
+        }
+
+        const formats = [
+          ...(data?.streamingData?.formats || []),
+          ...(data?.streamingData?.adaptiveFormats || []),
+        ];
+        const hasPlayableUrls = formats.some((f: any) => Boolean(f.url || f.signatureCipher));
+
+        if (status === 'OK' && hasPlayableUrls) {
+          return data;
+        }
+      } catch (err: any) {
+        lastError = err;
+      }
+    }
+
+    if (lastData) return lastData;
+    throw lastError || new Error('Failed to retrieve player data from all InnerTube clients');
   }
 
   /**
@@ -188,6 +244,29 @@ export class StreamExtractor {
       if (heightB !== heightA) return heightB - heightA;
       return (b.bitrate || 0) - (a.bitrate || 0);
     });
+
+    // If no dedicated audio-only streams exist, extract audio options from progressive video_audio streams
+    if (audioStreams.length === 0) {
+      for (const v of videoStreams) {
+        if (v.type === 'video_audio' && v.url) {
+          audioStreams.push({
+            itag: v.itag,
+            url: v.url,
+            type: 'audio_only',
+            mimeType: v.mimeType,
+            container: v.container,
+            codecs: v.codecs,
+            bitrate: v.bitrate,
+            averageBitrate: v.averageBitrate,
+            contentLength: v.contentLength,
+            approxDurationMs: v.approxDurationMs,
+            audioQuality: 'AUDIO_QUALITY_MEDIUM',
+            audioSampleRate: 44100,
+            audioChannels: 2,
+          });
+        }
+      }
+    }
 
     // Sort audio streams by bitrate (descending)
     audioStreams.sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
