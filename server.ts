@@ -60,9 +60,34 @@ async function handleApi(req: http.IncomingMessage, res: http.ServerResponse, pa
         res.end(JSON.stringify({ error: 'Missing "id" query parameter' }));
         return;
       }
-      const data = await ZenTube.getStreamWithFallback(id);
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(data));
+      try {
+        const data = await ZenTube.getStreamWithFallback(id);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(data));
+      } catch (err: any) {
+        // Fallback: If direct & mirrors fail on cloud datacenter IPs, return embed failover
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          platform: 'youtube',
+          id,
+          url: `https://www.youtube.com/watch?v=${id}`,
+          title: 'YouTube Video',
+          description: '',
+          duration: 0,
+          viewCount: 0,
+          isLive: false,
+          uploader: { id: '', name: 'YouTube', url: '', verified: false },
+          thumbnails: [{ url: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`, width: 480, height: 360 }],
+          videoStreams: [],
+          audioStreams: [],
+          subtitles: [],
+          chapters: [],
+          relatedVideos: [],
+          datacenterChallenge: true,
+          embedUrl: `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&enablejsapi=1`,
+          mirrorUsed: 'Embedded Player Failover (Datacenter Challenge)',
+        }));
+      }
       return;
     }
 

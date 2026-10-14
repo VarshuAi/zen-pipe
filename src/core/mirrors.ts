@@ -14,6 +14,9 @@ import type {
 } from '../types.ts';
 import { StreamExtractor } from '../extractors/stream.ts';
 import { extractVideoId } from '../utils/helper.ts';
+import { HttpClient } from './http.ts';
+import { InnerTubeClient } from './clients.ts';
+import { getText } from '../utils/parser.ts';
 
 export interface MirrorInstance {
   url: string;
@@ -400,9 +403,75 @@ export class MirrorManager {
         }
       }
 
-      throw new Error(
-        `Direct extraction failed (${primaryErr.message}), and all ${healthy.length} fallback mirrors failed: [${errors.join('; ')}]`
-      );
+      // 4. Graceful Datacenter Fallback: If direct streaming is challenged by YouTube anti-bot
+      // and public mirrors are unreachable, fetch rich metadata via Next endpoint and return
+      // an embedded failover player so playback NEVER breaks for the end-user.
+      try {
+        const visitorData = await HttpClient.getVisitorData();
+        const webContext = InnerTubeClient.createWebContext(visitorData);
+        const nextData = await HttpClient.postJson(
+          `${InnerTubeClient.ENDPOINTS.NEXT}?prettyPrint=false`,
+          InnerTubeClient.prepareNextBody(videoId, webContext),
+          { headers: InnerTubeClient.getWebHeaders() }
+        ).catch(() => null);
+
+        let title = 'YouTube Video';
+        let uploaderName = 'YouTube Creator';
+        let uploaderId = '';
+        let description = '';
+
+        try {
+          const results = nextData?.contents?.twoColumnWatchNextResults?.results?.results?.contents;
+          if (Array.isArray(results)) {
+            for (const item of results) {
+              if (item.videoPrimaryInfoRenderer) {
+                title = getText(item.videoPrimaryInfoRenderer.title) || title;
+              }
+              if (item.videoSecondaryInfoRenderer) {
+                const owner = item.videoSecondaryInfoRenderer.owner?.videoOwnerRenderer;
+                if (owner) {
+                  uploaderName = getText(owner.title) || uploaderName;
+                  uploaderId = owner.navigationEndpoint?.browseEndpoint?.browseId || '';
+                }
+                description = getText(item.videoSecondaryInfoRenderer.attributedDescription) || '';
+              }
+            }
+          }
+        } catch {}
+
+        return {
+          platform: 'youtube',
+          id: videoId,
+          url: `https://www.youtube.com/watch?v=${videoId}`,
+          title,
+          description,
+          duration: 0,
+          viewCount: 0,
+          isLive: false,
+          uploader: {
+            id: uploaderId,
+            name: uploaderName,
+            url: uploaderId ? `https://www.youtube.com/channel/${uploaderId}` : '',
+            verified: false,
+          },
+          thumbnails: [
+            { url: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`, width: 480, height: 360 },
+            { url: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`, width: 1280, height: 720 },
+          ],
+          videoStreams: [],
+          audioStreams: [],
+          subtitles: [],
+          chapters: [],
+          relatedVideos: [],
+          datacenterChallenge: true,
+          embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&enablejsapi=1`,
+          mirrorUsed: 'Embedded Player Failover (Datacenter Anti-Bot)',
+        };
+      } catch {
+        throw new Error(
+          `Direct extraction failed (${primaryErr.message}), and all ${healthy.length} fallback mirrors failed: [${errors.join('; ')}]`
+        );
+      }
     }
   }
 }

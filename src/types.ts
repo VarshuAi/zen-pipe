@@ -91,6 +91,9 @@ export interface StreamInfo {
   dashManifestUrl?: string;
   hlsManifestUrl?: string;
   relatedVideos: RelatedVideoItem[];
+  datacenterChallenge?: boolean;
+  embedUrl?: string;
+  mirrorUsed?: string;
 }
 
 export interface RelatedVideoItem {

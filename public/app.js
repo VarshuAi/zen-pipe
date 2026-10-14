@@ -647,7 +647,7 @@ class ZenTubeApp {
       const data = await res.json();
       this.hideLoader();
 
-      if (data.error) {
+      if (data.error && !data.embedUrl) {
         this.showError(data.error);
         return;
       }
@@ -846,7 +846,7 @@ class ZenTubeApp {
       const stream = await res.json();
       this.hideLoader();
 
-      if (stream.error) {
+      if (stream.error && !stream.embedUrl) {
         this.showError(stream.error);
         return;
       }
@@ -1021,6 +1021,36 @@ class ZenTubeApp {
     if (this.hlsInstance) {
       this.hlsInstance.destroy();
       this.hlsInstance = null;
+    }
+
+    // Handle Datacenter Anti-Bot Failover Embed
+    if (stream.datacenterChallenge && stream.embedUrl) {
+      this.mainVideo.style.display = 'none';
+      if (this.mainAudio.src) this.mainAudio.removeAttribute('src');
+
+      let embed = document.getElementById('mainEmbed');
+      if (!embed) {
+        embed = document.createElement('iframe');
+        embed.id = 'mainEmbed';
+        embed.className = 'yt-embed-player';
+        embed.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        embed.allowFullscreen = true;
+        embed.style.width = '100%';
+        embed.style.height = '100%';
+        embed.style.border = 'none';
+        embed.style.borderRadius = '12px';
+        embed.style.minHeight = '480px';
+        this.mainVideo.parentElement.appendChild(embed);
+      }
+      embed.style.display = 'block';
+      embed.src = stream.embedUrl;
+      return;
+    } else {
+      const embed = document.getElementById('mainEmbed');
+      if (embed) {
+        embed.style.display = 'none';
+        embed.src = '';
+      }
     }
 
     // Handle HLS Live Stream (Prioritize HLS for genuine live broadcast)

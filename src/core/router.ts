@@ -5,6 +5,7 @@
  */
 
 import { StreamExtractor } from '../extractors/stream.ts';
+import { MirrorManager } from './mirrors.ts';
 import { SoundCloudExtractor } from '../services/soundcloud/extractor.ts';
 import { BandcampExtractor } from '../services/bandcamp/extractor.ts';
 import { PeerTubeExtractor } from '../services/peertube/extractor.ts';
@@ -70,7 +71,7 @@ export class UniversalRouter {
 
       case 'youtube':
       default: {
-        const stream = await StreamExtractor.extract(urlOrId);
+        const stream = await MirrorManager.extractWithFallback(urlOrId);
         stream.platform = 'youtube';
         return stream;
       }
