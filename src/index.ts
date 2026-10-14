@@ -67,6 +67,8 @@ export { MirrorManager } from './core/mirrors.ts';
  * ZenTube Main Multi-Platform Facade
  */
 export class ZenTube {
+  public static readonly router = UniversalRouter;
+
   /**
    * Universal extractor: Automatically detects platform (YouTube, SoundCloud, Bandcamp, PeerTube, MediaCCC) from URL
    */

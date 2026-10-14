@@ -17,6 +17,10 @@ export class HttpClient {
   // Default consent cookie to prevent consent redirects
   private static readonly CONSENT_COOKIE = 'SOCS=CAESEwgDEgk2OTc3NjExMDUaAmVuIAEaBgiA_K-0Bg; CONSENT=PENDING+999';
 
+  public static getCookieHeader(): string {
+    return process.env.YOUTUBE_COOKIES || process.env.COOKIES || this.CONSENT_COOKIE;
+  }
+
   /**
    * Performs an HTTP POST request with JSON payload
    */
@@ -27,7 +31,7 @@ export class HttpClient {
   ): Promise<T> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Cookie': this.CONSENT_COOKIE,
+      'Cookie': this.getCookieHeader(),
       ...options.headers,
     };
 
@@ -63,7 +67,7 @@ export class HttpClient {
     const isGoogle = url.includes('youtube.com') || url.includes('google.com') || url.includes('googlevideo.com');
     const headers: Record<string, string> = {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
-      ...(isGoogle ? { 'Cookie': this.CONSENT_COOKIE } : {}),
+      ...(isGoogle ? { 'Cookie': this.getCookieHeader() } : {}),
       ...options.headers,
     };
 
