@@ -523,34 +523,38 @@ class ZenTubeApp {
 
   renderVideoCardHtml(item) {
     const thumb = item.thumbnails?.[0]?.url || (item.thumbnails?.[1]?.url) || 'https://via.placeholder.com/320x180';
-    const safeTitle = (item.title || '').replace(/'/g, "\'");
     const uploaderName = item.uploader?.name || item.uploaderName || item.artist || 'Creator';
-    const safeAuthor = uploaderName.replace(/'/g, "\'");
+    const channelId = item.uploader?.id || item.channelId || '';
+    const channelClick = channelId ? `app.loadChannel('${channelId}')` : '';
     const isLive = item.durationText === 'LIVE' || (item.durationText && item.durationText.includes('LIVE')) || item.isLive;
     const avatarUrl = item.uploader?.avatarUrl || item.uploaderAvatar || 'https://yt3.ggpht.com/a/default-user=s88-c-k-c0x00ffffff-no-rj';
     const viewsText = item.viewCountText || (item.viewCount ? Number(item.viewCount).toLocaleString() + ' views' : '');
     const timeText = item.publishedTimeText || item.uploadedDate || '';
+    const encTitle = encodeURIComponent(item.title || '');
+    const encAuthor = encodeURIComponent(uploaderName);
+    const encThumb = encodeURIComponent(thumb);
+    const encDur = encodeURIComponent(isLive ? 'LIVE' : (item.durationText || ''));
 
     return `
       <div class="video-card" onclick="app.loadVideo('${item.id}')">
         <div class="thumb-container">
           <img class="thumb-img" src="${thumb}" loading="lazy" alt="${this.escapeHtml(item.title || '')}">
           ${isLive ? '<span class="duration-badge live"><span class="live-dot-pulse"></span> LIVE</span>' : (item.durationText ? `<span class="duration-badge">${item.durationText}</span>` : '')}
-          <button class="card-queue-btn" title="Add to Queue" onclick="event.stopPropagation(); app.addToQueue({ id: '${item.id}', title: '${safeTitle}', uploaderName: '${safeAuthor}', thumbnails: [{ url: '${thumb}' }], durationText: '${isLive ? 'LIVE' : (item.durationText || '')}', platform: 'youtube' })">+ Queue</button>
+          <button class="card-queue-btn" title="Add to Queue" data-id="${item.id}" data-title="${encTitle}" data-author="${encAuthor}" data-thumb="${encThumb}" data-duration="${encDur}" data-platform="youtube" onclick="event.stopPropagation(); app.addToQueueFromCard(this)">+ Queue</button>
         </div>
         <div class="card-details">
-          <div class="card-avatar-col" onclick="event.stopPropagation(); ${channelClick}" title="${safeAuthor}">
-            <img class="card-channel-avatar" src="${avatarUrl}" loading="lazy" alt="${safeAuthor}" onerror="this.src='https://yt3.ggpht.com/a/default-user=s88-c-k-c0x00ffffff-no-rj'">
+          <div class="card-avatar-col" onclick="event.stopPropagation(); ${channelClick}" title="${this.escapeHtml(uploaderName)}">
+            <img class="card-channel-avatar" src="${avatarUrl}" loading="lazy" alt="${this.escapeHtml(uploaderName)}" onerror="this.src='https://yt3.ggpht.com/a/default-user=s88-c-k-c0x00ffffff-no-rj'">
           </div>
           <div class="card-text-col">
             <h3 class="card-title" title="${this.escapeHtml(item.title || '')}">${this.escapeHtml(item.title || '')}</h3>
-            <div class="card-channel" onclick="event.stopPropagation(); ${channelClick}" title="${safeAuthor}">
+            <div class="card-channel" onclick="event.stopPropagation(); ${channelClick}" title="${this.escapeHtml(uploaderName)}">
               <span>${this.escapeHtml(uploaderName)}</span>
               ${item.uploader?.verified ? '<svg class="verified-check" viewBox="0 0 24 24" width="14" height="14" fill="#aaa"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zM9.8 17.3l-4.2-4.1 1.4-1.4 2.8 2.7 7.4-7.4 1.4 1.4-8.8 8.8z"/></svg>' : ''}
             </div>
             <div class="card-meta">
               <span>${viewsText}</span>
-              ${timeText ? `<span class="meta-dot">�</span><span>${timeText}</span>` : ''}
+              ${timeText ? `<span class="meta-dot">•</span><span>${timeText}</span>` : ''}
             </div>
           </div>
         </div>
@@ -1748,6 +1752,19 @@ class ZenTubeApp {
     this.autoplayNext = !!enabled;
     const check = document.getElementById('autoplayCheck');
     if (check) check.checked = this.autoplayNext;
+  }
+
+  addToQueueFromCard(el) {
+    if (!el || !el.dataset) return;
+    const d = el.dataset;
+    this.addToQueue({
+      id: d.id,
+      title: decodeURIComponent(d.title || ''),
+      uploaderName: decodeURIComponent(d.author || 'Unknown'),
+      thumbnails: [{ url: decodeURIComponent(d.thumb || '') }],
+      durationText: decodeURIComponent(d.duration || ''),
+      platform: d.platform || 'youtube'
+    });
   }
 
   addToQueue(item, playNow = false) {
