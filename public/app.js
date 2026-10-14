@@ -99,6 +99,19 @@ class ZenTubeApp {
       { serviceId: 2, serviceName: 'peertube', url: 'https://peertube.tv/video-channels/framasoft', name: 'Framasoft' },
     ];
 
+    // Flagship Features State: Ambient Light, Cinema Theater, Audio Saver
+    this.isAmbientMode = localStorage.getItem('zenpipe_ambient_mode') !== 'false';
+    this.ambientCanvas = document.getElementById('ambientCanvas');
+    this.ambientCtx = this.ambientCanvas ? this.ambientCanvas.getContext('2d') : null;
+    this.ambientTimer = null;
+    this.isTheaterMode = false;
+    this.isAudioOnlyMode = false;
+
+    const ambientBtn = document.getElementById('ambientToggleBtn');
+    if (ambientBtn) ambientBtn.classList.toggle('active', this.isAmbientMode);
+    const glow = document.getElementById('playerAmbientGlow');
+    if (glow && !this.isAmbientMode) glow.classList.add('disabled');
+
     this.loadLocalData();
     this.initEventListeners();
     this.initPlayerSync();
@@ -311,6 +324,7 @@ class ZenTubeApp {
       const miniPlay = document.getElementById('miniPlayBtn');
       if (miniPlay) miniPlay.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>';
       if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+      this.startAmbientSampler();
     });
     v.addEventListener('canplay', () => {
       const overlay = document.getElementById('playerOverlay');
@@ -322,9 +336,11 @@ class ZenTubeApp {
       if (miniPlay) miniPlay.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
       if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
       this.recordHistoryProgress();
+      this.stopAmbientSampler();
     });
     v.addEventListener('ended', () => {
       this.recordHistoryProgress(true);
+      this.stopAmbientSampler();
       this.onTrackEnded();
     });
     v.addEventListener('seeking', () => { if (a.src) a.currentTime = v.currentTime; });
@@ -985,6 +1001,15 @@ class ZenTubeApp {
     this.checkResumePrompt(stream);
     this.updateBookmarkButton();
     this.recordHistoryProgress();
+
+    if (this.isAudioOnlyMode) {
+      const cover = document.getElementById('audioOnlyCover');
+      const thumbImg = document.getElementById('audioOnlyThumb');
+      if (cover) cover.style.display = 'flex';
+      if (thumbImg) {
+        thumbImg.src = stream.thumbnails?.[stream.thumbnails.length - 1]?.url || stream.thumbnails?.[0]?.url || '';
+      }
+    }
   }
 
   setupMediaSources(autoplay = true, preservePosition = false) {
@@ -3175,6 +3200,21 @@ class ZenTubeApp {
           e.preventDefault();
           this.togglePip();
           break;
+        case 't':
+        case 'T':
+          e.preventDefault();
+          this.toggleTheaterMode();
+          break;
+        case 'a':
+        case 'A':
+          e.preventDefault();
+          this.toggleAmbientMode();
+          break;
+        case 'q':
+        case 'Q':
+          e.preventDefault();
+          this.toggleAudioOnlyMode();
+          break;
         case '[':
           e.preventDefault();
           this.setLoopA();
@@ -3218,6 +3258,97 @@ class ZenTubeApp {
     const currentRate = this.mainVideo?.playbackRate || 1.0;
     const newRate = Math.min(3.0, Math.max(0.25, Math.round((currentRate + delta) * 100) / 100));
     this.setPlaybackSpeed(newRate);
+  }
+
+  // --- FLAGSHIP ENGINE SUITE: AMBIENT, THEATER & AUDIO SAVER ---
+  toggleAmbientMode() {
+    this.isAmbientMode = !this.isAmbientMode;
+    try {
+      localStorage.setItem('zenpipe_ambient_mode', this.isAmbientMode ? 'true' : 'false');
+    } catch {}
+    const btn = document.getElementById('ambientToggleBtn');
+    if (btn) btn.classList.toggle('active', this.isAmbientMode);
+    const glow = document.getElementById('playerAmbientGlow');
+    if (glow) glow.classList.toggle('disabled', !this.isAmbientMode);
+
+    if (this.isAmbientMode) {
+      if (this.mainVideo && !this.mainVideo.paused && !this.mainVideo.ended) {
+        this.startAmbientSampler();
+      }
+      this.showSponsorToast('Atmospheric Ambient Glow: ON');
+    } else {
+      this.stopAmbientSampler();
+      this.showSponsorToast('Atmospheric Ambient Glow: OFF');
+    }
+  }
+
+  startAmbientSampler() {
+    if (!this.isAmbientMode || !this.ambientCanvas || !this.ambientCtx || !this.mainVideo) return;
+    this.stopAmbientSampler();
+    const glow = document.getElementById('playerAmbientGlow');
+    if (glow) glow.classList.remove('disabled');
+
+    const sampleFrame = () => {
+      if (!this.isAmbientMode || !this.mainVideo || this.mainVideo.paused || this.mainVideo.ended) {
+        this.stopAmbientSampler();
+        return;
+      }
+      try {
+        if (this.mainVideo.readyState >= 2) {
+          this.ambientCtx.drawImage(this.mainVideo, 0, 0, this.ambientCanvas.width, this.ambientCanvas.height);
+        }
+      } catch (e) {
+        // Cross-origin video canvas security catch
+      }
+      this.ambientTimer = setTimeout(sampleFrame, 80);
+    };
+
+    sampleFrame();
+  }
+
+  stopAmbientSampler() {
+    if (this.ambientTimer) {
+      clearTimeout(this.ambientTimer);
+      this.ambientTimer = null;
+    }
+  }
+
+  toggleTheaterMode() {
+    this.isTheaterMode = !this.isTheaterMode;
+    if (this.watchSection) {
+      this.watchSection.classList.toggle('theater-mode', this.isTheaterMode);
+    }
+    const btn = document.getElementById('theaterBtn');
+    if (btn) btn.classList.toggle('active', this.isTheaterMode);
+    this.showSponsorToast(this.isTheaterMode ? 'Theater Mode (Cinema Width)' : 'Default View');
+  }
+
+  toggleAudioOnlyMode() {
+    this.isAudioOnlyMode = !this.isAudioOnlyMode;
+    const cover = document.getElementById('audioOnlyCover');
+    const thumbImg = document.getElementById('audioOnlyThumb');
+    const btn = document.getElementById('audioOnlyToggleBtn');
+    const btnText = document.getElementById('audioOnlyToggleText');
+
+    if (this.isAudioOnlyMode) {
+      if (cover) {
+        cover.style.display = 'flex';
+        if (thumbImg && this.currentStream) {
+          const t = this.currentStream.thumbnails?.[this.currentStream.thumbnails.length - 1]?.url ||
+                    this.currentStream.thumbnails?.[0]?.url ||
+                    '';
+          thumbImg.src = t;
+        }
+      }
+      if (btn) btn.classList.add('active');
+      if (btnText) btnText.innerText = 'Data Saver On';
+      this.showSponsorToast('Audio-Only Data Saver Active');
+    } else {
+      if (cover) cover.style.display = 'none';
+      if (btn) btn.classList.remove('active');
+      if (btnText) btnText.innerText = 'Audio';
+      this.showSponsorToast('Video Mode Restored');
+    }
   }
 }
 

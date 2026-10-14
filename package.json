@@ -1,24 +1,27 @@
 {
-  "name": "zentube",
+  "name": "zen-pipe",
   "version": "1.0.0",
-  "description": "High-performance streaming media and metadata extractor inspired by NewPipe",
+  "description": "High-performance universal media extraction engine and YouTube client. Zero external npm dependencies.",
   "type": "module",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "bin": {
-    "zentube": "./bin/zentube.js"
+    "zenpipe": "./bin/zenpipe.js"
   },
   "scripts": {
-    "dev": "npm --prefix fluxa run dev",
-    "build": "npm --prefix fluxa run build",
-    "fluxa:dev": "npm --prefix fluxa run dev",
-    "fluxa:build": "npm --prefix fluxa run build",
     "start": "node --experimental-strip-types server.ts",
+    "dev": "node --experimental-strip-types server.ts",
     "test": "node --experimental-strip-types test/zentube.test.ts",
-    "cli": "node bin/zentube.js"
+    "test:features": "node --experimental-strip-types test/features.test.ts",
+    "test:all": "node --experimental-strip-types test/zentube.test.ts && node --experimental-strip-types test/features.test.ts",
+    "cli": "node bin/zenpipe.js",
+    "docker:build": "docker build -t zen-pipe .",
+    "docker:run": "docker run -p 3333:3333 zen-pipe",
+    "fluxa:dev": "npm --prefix fluxa run dev",
+    "fluxa:build": "npm --prefix fluxa run build"
   },
   "keywords": [
-    "zentube",
+    "zenpipe",
     "newpipe",
     "extractor",
     "youtube",
@@ -26,8 +29,19 @@
     "streaming",
     "media-extractor",
     "dash",
-    "hls"
+    "hls",
+    "sponsorblock",
+    "return-youtube-dislike",
+    "web-audio-dsp"
   ],
-  "author": "ZenTube Team",
+  "author": "Varshan Gowda <gowdavarshan466@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VarshuAi/zen-pipe.git"
+  },
+  "bugs": {
+    "url": "https://github.com/VarshuAi/zen-pipe/issues"
+  },
+  "homepage": "https://github.com/VarshuAi/zen-pipe",
   "license": "GPL-3.0"
 }

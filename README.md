@@ -1,136 +1,274 @@
-# ZenPipe (ZenTube) ⚡
+<div align="center">
 
-A high-performance multi-platform streaming media and metadata extraction engine and 1:1 desktop YouTube client with full **NewPipe Extractor** feature and service parity.
+# ⚡ ZenPipe
 
-ZenPipe enables programmatic extraction of media streams, progressive MP4 files, audio tracks, searchable transcripts, subtitles, playlists, channels, comments, live Atom RSS feeds, SponsorBlock, Return YouTube Dislike (RYD), A-B loopers, Web Audio DSP vocal removers, and OPML subscription management across 5 platforms:
-1. **YouTube**
-2. **SoundCloud**
-3. **Bandcamp**
-4. **PeerTube** (Federated instances & video networks)
+### Universal Media Streaming Engine, CLI Suite & Flagship Web Client
+**Zero NPM runtime dependencies • Multi-platform • Privacy-first • 100% Free & Open Source**
+
+[![ZenPipe CI](https://github.com/VarshuAi/zen-pipe/actions/workflows/ci.yml/badge.svg)](https://github.com/VarshuAi/zen-pipe/actions/workflows/ci.yml)
+[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Node.js 22 | 24](https://img.shields.io/badge/node.js-22%20%7C%2024-brightgreen.svg)](https://nodejs.org)
+[![NPM Dependencies](https://img.shields.io/badge/dependencies-0-success.svg)](https://github.com/VarshuAi/zen-pipe)
+[![Tests Passing](https://img.shields.io/badge/tests-98%2F98%20passing-brightgreen.svg)](https://github.com/VarshuAi/zen-pipe)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://github.com/VarshuAi/zen-pipe)
+
+[**Explore Live Web App**](http://localhost:3333) • [**CLI Guide**](#-cli-usage) • [**Architecture**](#-architecture) • [**Docker Self-Hosting**](#-docker--self-hosting) • [**Contributing**](./CONTRIBUTING.md)
+
+</div>
+
+---
+
+## 📖 Overview
+
+**ZenPipe** is a high-performance media extraction engine, universal streaming server, command-line interface, and authentic desktop YouTube client. Engineered with **zero external NPM dependencies**, ZenPipe runs directly on native Node.js 22/24 using `--experimental-strip-types`, delivering unmatched speed, complete auditability, and immunity to supply-chain vulnerabilities.
+
+ZenPipe seamlessly extracts high-definition video streams (up to 4K 60fps), audio tracks (Opus & AAC), 24/7 live HLS streams, timestamped transcripts, comments, and playlists across 5 premier media networks:
+1. **YouTube** (VOD, 24/7 Live HLS, Shorts, Playlists, Channels, Comments, Transcripts)
+2. **SoundCloud** (Direct 128k MP3 streaming, discographies, track comments)
+3. **Bandcamp** (Albums, track releases, high-res album art)
+4. **PeerTube** (Federated instances, direct MP4 & HLS video networks)
 5. **media.ccc.de** (Chaos Computer Club conference archives & CDN streams)
 
-All extractors run directly on native Node.js 24 without third-party npm dependencies, official API keys, Google Play Services, or user credentials.
-
 ---
 
-## 🌟 Platforms & Feature Matrix
+## 🏆 Feature Comparison
 
-| Feature | YouTube | SoundCloud | Bandcamp | PeerTube | media.ccc.de |
+| Feature | ZenPipe | Invidious | NewPipe | Cobalt | FreeTube |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Stream Extraction** | Audio (M4A/Opus), Video (144p-4K), DASH & HLS | Direct 128k MP3 streams | Direct 128k MP3 streams | Direct 360p-1080p MP4 & HLS | Direct 576p-1440p MP4, WebM, MP3 & Opus |
-| **Bypass Restrictions** | VisionOS InnerTube + `base.js` CipherEngine | Dynamic `client_id` scraper | Direct `data-tralbum` parser | Federated REST API | Public Media API |
-| **Search** | Videos, Channels, Playlists + Autocomplete | Tracks, Sets, Artists | Discography & Tracks | Instance & Global search | Event & Conference search |
-| **Transcripts & Subtitles** | Timestamped cues + SRT/VTT/Text exporter | — | Track Lyrics | Subtitle tracks | Slides & Timelines |
-| **Shorts / Reels** | Vertical 9:16 Shorts reel player with navigation | — | — | — | — |
-| **Related / Recommendations** | `/next` secondary results extractor | Related tracks | Related releases | — | Related events |
-| **Channel / Artist Feeds** | Canonical handles + Atom RSS Feed | Artist profile & tracks | Artist releases | Video channels & uploads | Conferences & events |
-| **Playlists / Sets** | Full tracklists & pagination | Sets & playlists | Full album tracks & art | Channel playlists | Conference playlists |
-| **Comments** | Modern ViewModel entity mutations | Track comments | — | Threaded comments | — |
-| **Subscription Backups** | OPML XML + NewPipe JSON format | OPML export | OPML export | OPML export | OPML export |
-| **Vocal Remover DSP** | Real-time differential phase cancellation karaoke | — | — | — | — |
-| **Universal Router** | `ZenTube.extract(url)` automatically routes any supported URL to its native extractor! |
-| **FFmpeg Stream Muxer** | `ZenTube.downloadAndMux(videoUrl, audioUrl, outputPath)` merges adaptive video + audio |
+| **External NPM Runtime Deps** | **0 (Zero)** | N/A (Crystal) | N/A (Java) | Many (Node) | Many (Electron) |
+| **Supported Platforms** | **5 Platforms** (YT, SC, BC, PT, CCC) | 1 (YouTube) | 5 Platforms | 10+ (Downloader only) | 1 (YouTube) |
+| **Interactive Web Client** | **Included** (PWA Dark Theme) | Included | Android Only | Download Web | Desktop Only |
+| **Built-in CLI Tool** | **`zenpipe` CLI** | None | None | CLI | None |
+| **Atmospheric Ambient Light** | **Real-time 15fps Canvas Glow** | ❌ | ❌ | ❌ | ❌ |
+| **Cinema Theater Mode** | **One-click (`t`)** | Basic | ❌ | ❌ | Yes |
+| **Audio-Only Data Saver** | **Vinyl Visualizer Mode (`q`)** | ❌ | Yes (Mobile) | Audio download | Yes |
+| **Community Integrations** | **SponsorBlock + Return YouTube Dislike** | Partial | Partial | ❌ | Yes |
+| **Studio DSP Equalizer** | **Web Audio 5-Band + Karaoke DSP** | ❌ | ❌ | ❌ | ❌ |
+| **A-B Repeat Looper** | **Sub-second precision (`[`, `]`, `\`)** | ❌ | ❌ | ❌ | ❌ |
+| **Automated Failover Mirrors** | **Invidious & Piped Failover Engine** | Manual | ❌ | ❌ | Invidious API |
+| **Subscription Privacy** | **OPML & NewPipe JSON Zero-Cloud** | Database | Local SQLite | ❌ | Local PouchDB |
+| **Docker & Self-Hosting** | **Alpine Multi-Stage Container** | Complex | N/A | Docker | N/A |
 
 ---
 
-## 🚀 Quick Start
+## 🏛 Architecture
 
-### Run Live Integration Test Suite (98 / 98 Tests Passing)
-```bash
-node --experimental-strip-types test/zentube.test.ts
-node --experimental-strip-types test/features.test.ts
+```mermaid
+flowchart TD
+    subgraph Clients["ZenPipe Consumer Layer"]
+        CLI["CLI Tool (bin/zenpipe.js)"]
+        WebUI["Web Client (PWA / Dark Theme #0f0f0f)"]
+        API["Programmatic TS/JS Library"]
+    end
+
+    subgraph CoreEngine["ZenPipe Core Engine (Zero NPM Dependencies)"]
+        Router["Universal Router (ZenTube.extract)"]
+        Cipher["InnerTube VisionOS & Cipher Engine (n-token deobfuscator)"]
+        LiveEng["24/7 Live Stream HLS Parser"]
+        MirrorEng["Fallback Mirror Failover Engine (Invidious / Piped)"]
+        Downloader["Multi-Chunk HTTP Resumable Downloader"]
+    end
+
+    subgraph Providers["Platform Extractors"]
+        YT["YouTube Extractor"]
+        SC["SoundCloud Extractor"]
+        BC["Bandcamp Extractor"]
+        PT["PeerTube Extractor"]
+        CCC["media.ccc.de Extractor"]
+    end
+
+    subgraph Community["Enrichment Services"]
+        SB["SponsorBlock API"]
+        RYD["Return YouTube Dislike API"]
+        RSS["Channel Atom RSS Feeds"]
+    end
+
+    CLI --> Router
+    WebUI --> Router
+    API --> Router
+
+    Router --> Cipher
+    Cipher --> YT
+    Router --> SC
+    Router --> BC
+    Router --> PT
+    Router --> CCC
+
+    YT --> SB
+    YT --> RYD
+    YT --> RSS
+    YT --> LiveEng
+    YT --> MirrorEng
 ```
 
-### Start Web Client (1:1 YouTube Desktop Dark Theme)
+---
+
+## ⚡ Quick Start
+
+### 1. Run with Node.js 22 or 24+
+
 ```bash
-node --experimental-strip-types server.ts
+# Clone the repository
+git clone https://github.com/VarshuAi/zen-pipe.git
+cd zen-pipe
+
+# Start the web client & API server
+npm start
 ```
-Open **`http://localhost:3333`** in your browser!
+
+Visit **`http://localhost:3333`** in your browser.
+
+### 2. Run All Automated Tests (98 Tests Passing)
+
+```bash
+# Run core test suite (92 tests)
+npm test
+
+# Run extended features test suite (6 tests)
+npm run test:features
+
+# Run complete test matrix
+npm run test:all
+```
 
 ---
 
 ## 💻 CLI Usage
 
+The `zenpipe` executable provides instantaneous media playback, searching, transcripts, and downloads right from your terminal.
+
 ```bash
-# 1. Universal stream extraction (YouTube, SoundCloud, Bandcamp, PeerTube, MediaCCC)
-node bin/zentube.js stream jNQXAC9IVRw
-node bin/zentube.js stream "https://peertube.tv/w/52364"
-node bin/zentube.js stream "https://media.ccc.de/v/bob11-2026-swift-ui-chakravarty"
-node bin/zentube.js stream "https://soundcloud.com/chillhopdotcom/..."
-node bin/zentube.js stream "https://chillhop.bandcamp.com/album/..."
+# Display help and available commands
+node bin/zenpipe.js --help
 
-# 2. PeerTube & MediaCCC
-node bin/zentube.js peertube 52364
-node bin/zentube.js pt-search "linux"
-node bin/zentube.js mediaccc bob11-2026-swift-ui-chakravarty
-node bin/zentube.js ccc-search "python"
+# 1. Stream video or audio stream URL directly
+node bin/zenpipe.js stream jNQXAC9IVRw
 
-# 3. Channel Atom RSS Feed (Zero rate limits, zero auth)
-node bin/zentube.js feed "@NoCopyrightSounds"
+# 2. Universal extraction (Auto-detects SoundCloud, Bandcamp, PeerTube, MediaCCC)
+node bin/zenpipe.js stream "https://peertube.tv/w/52364"
+node bin/zenpipe.js stream "https://media.ccc.de/v/bob11-2026-swift-ui-chakravarty"
+node bin/zenpipe.js stream "https://soundcloud.com/chillhopdotcom/saturn"
 
-# 4. Related / Recommended Videos
-node bin/zentube.js related jNQXAC9IVRw
+# 3. Search videos with platform filter
+node bin/zenpipe.js search "lofi hip hop"
+node bin/zenpipe.js search "synthwave" --platform soundcloud
 
-# 5. Export Subscriptions to OPML XML
-node bin/zentube.js opml-export
+# 4. Explore trending feeds by category and region
+node bin/zenpipe.js trending music US
+node bin/zenpipe.js trending gaming IN
+
+# 5. Search autocomplete suggestions
+node bin/zenpipe.js suggest "javascript tutorial"
 
 # 6. Extract timestamped transcript & convert to SRT
-node bin/zentube.js transcript jNQXAC9IVRw
-node bin/zentube.js subtitles jNQXAC9IVRw srt
+node bin/zenpipe.js transcript jNQXAC9IVRw
+node bin/zenpipe.js subtitles jNQXAC9IVRw srt
 
-# 7. Extract YouTube Shorts feed
-node bin/zentube.js shorts
+# 7. Extract YouTube Shorts vertical reels
+node bin/zenpipe.js shorts
 
-# 8. Download stream to disk with progress bar
-node bin/zentube.js download <streamUrl> ./output.mp4
+# 8. Check health of fallback mirrors (Invidious & Piped)
+node bin/zenpipe.js mirrors
+
+# 9. Download stream directly to disk with live progress
+node bin/zenpipe.js download <streamUrl> ./video.mp4
 ```
 
 ---
 
-## 📦 Programmatic Library API Usage
+## 🐳 Docker & Self-Hosting
+
+ZenPipe provides an ultra-lightweight, production-grade Docker image based on **Alpine Linux Node 24**:
+
+### One-Command Deployment with Docker Compose
+
+```bash
+docker compose up -d
+```
+
+### Manual Docker Build & Run
+
+```bash
+# Build the container
+docker build -t zen-pipe .
+
+# Run on port 3333 with automatic restart
+docker run -d --name zenpipe -p 3333:3333 --restart unless-stopped zen-pipe
+```
+
+Verify container health:
+```bash
+curl http://localhost:3333/health
+# Response: {"status":"healthy","uptime":12.4,"version":"1.0.0"}
+```
+
+---
+
+## 🎨 Flagship Web Experience
+
+- **Atmospheric Ambient Backlight (`a`)**: Real-time canvas sampling at ~12.5fps with CSS Gaussian bloom blur.
+- **Cinema Theater Mode (`t`)**: Expands video to full cinema container width without page reload.
+- **Audio-Only Data Saver (`q`)**: Switches off video rendering, saving bandwidth with animated vinyl artwork.
+- **Studio DSP Equalizer**: 5-band parametric biquad equalizer with Bass Punch (+9dB), Vocal Clarity, Treble Air, and real-time differential phase cancellation Karaoke vocal isolation.
+- **A-B Precision Looper (`[`, `]`, `\`)**: Loop any video segment down to millisecond precision for music practice or tutorials.
+- **Zero-Cloud Privacy**: History, bookmarks, and custom playlists stored 100% locally on your machine.
+- **Progressive Web App (PWA)**: Full offline service worker caching for instant loading on desktop and mobile.
+
+### Keyboard Shortcuts Cheatsheet
+
+| Key | Action |
+| :---: | :--- |
+| <kbd>Space</kbd> / <kbd>k</kbd> | Play / Pause |
+| <kbd>j</kbd> / <kbd>l</kbd> | Seek -10s / +10s |
+| <kbd>&larr;</kbd> / <kbd>&rarr;</kbd> | Seek -5s / +5s |
+| <kbd>m</kbd> | Mute / Unmute |
+| <kbd>f</kbd> | Toggle Fullscreen |
+| <kbd>t</kbd> | Toggle Cinema Theater Mode |
+| <kbd>a</kbd> | Toggle Atmospheric Ambient Backlight |
+| <kbd>q</kbd> | Toggle Audio-Only Data Saver |
+| <kbd>p</kbd> | Picture-in-Picture |
+| <kbd>[</kbd> / <kbd>]</kbd> | Set Loop Point A / B |
+| <kbd>\</kbd> | Toggle A-B Repeat Loop |
+| <kbd>&lt;</kbd> / <kbd>&gt;</kbd> | Playback Speed +/- |
+| <kbd>/</kbd> | Focus Search Bar |
+| <kbd>?</kbd> | Open Shortcuts Cheatsheet |
+
+---
+
+## 🔌 Programmatic API
 
 ```typescript
-import { ZenTube } from './src/index.ts';
+import { ZenTube } from 'zen-pipe';
 
-// 1. Universal Extraction (Auto-detects all 5 platforms)
-const stream = await ZenTube.extract('https://peertube.tv/w/52364');
-console.log(stream.platform, stream.title, stream.videoStreams[0].url);
+// 1. Universal Media Extraction (Auto-detects URL)
+const stream = await ZenTube.extract('https://www.youtube.com/watch?v=jNQXAC9IVRw');
+console.log(stream.title, stream.videoStreams[0].url);
 
-// 2. PeerTube Service
-const ptVideo = await ZenTube.peertube.getVideo('52364');
-const ptResults = await ZenTube.peertube.search('linux');
+// 2. Fetch Search Suggestions
+const suggestions = await ZenTube.getSuggestions('chillhop');
 
-// 3. media.ccc.de Service
-const cccEvent = await ZenTube.mediaccc.getEvent('bob11-2026-swift-ui-chakravarty');
-const conferences = await ZenTube.mediaccc.getConferences();
+// 3. YouTube Shorts Feed
+const shorts = await ZenTube.getShorts();
 
-// 4. Fast Channel Atom Feed
-const feed = await ZenTube.getFeed('@NoCopyrightSounds');
-console.log(`Channel ${feed.title} has ${feed.items.length} recent uploads`);
+// 4. Trending Feed
+const trending = await ZenTube.getTrending('music', 'US');
 
-// 5. YouTube Related Recommendations
-const related = await ZenTube.getRelated('jNQXAC9IVRw');
+// 5. Channel Atom RSS Feed (Zero API keys)
+const feed = await ZenTube.getChannelFeed('@NoCopyrightSounds');
 
-// 6. Subscriptions Management (OPML & NewPipe JSON)
-const opmlXml = ZenTube.subscriptions.exportOpml(subscriptions);
-const importedSubs = ZenTube.subscriptions.importOpml(opmlXml);
-const newpipeJson = ZenTube.subscriptions.exportNewPipeJson(subscriptions);
-
-// 7. FFmpeg Stream Muxer (Combine adaptive video + audio)
-await ZenTube.downloadAndMux(videoUrl, audioUrl, './video_1080p.mp4');
+// 6. Subtitles & Transcripts
+const transcript = await ZenTube.getTranscript('jNQXAC9IVRw');
+const srt = ZenTube.transcriptToSrt(transcript);
 ```
 
 ---
 
-## ⚖️ Architectural Comparison to NewPipe Extractor
+## 🤝 Contributing
 
-| Feature | NewPipe Extractor (Java) | ZenPipe (TypeScript / Node.js) |
-| :--- | :--- | :--- |
-| **Runtime & Language** | Java / JVM (Gradle build) | Native Node.js 24 TypeScript (Zero external npm deps) |
-| **Service Coverage** | YouTube, SoundCloud, Bandcamp, PeerTube, media.ccc.de | **All 5 Services Fully Supported** |
-| **YouTube Protocol** | Android InnerTube client | VisionOS + Web InnerTube client (anti-throttling bypass) |
-| **Cipher Engine** | Rhino JS interpreter executing `base.js` | Native V8 extraction of decipher functions (`swap`, `reverse`, `splice`) |
-| **Feeds & Subscriptions**| XML PullParser + OPML parser | Zero-dependency Regex XML stream parser + OPML & NewPipe JSON serializer |
-| **Stream Muxing** | External Android MediaMuxer / FFmpeg | Built-in `StreamMuxer` interfacing system FFmpeg |
-| **Testing** | JUnit unit tests | Native Node test runner against live endpoints (**98/98 tests passing**) |
-| **Frontend Demo** | Android APK | 1:1 Desktop YouTube Clone with Web Audio DSP, RYD, SponsorBlock |
+Contributions are welcomed! Please see our [**Contributing Guide**](./CONTRIBUTING.md) for architectural guidelines, test procedures, and code standards.
+
+---
+
+## 📜 License
+
+ZenPipe is released under the **GNU General Public License v3.0 (GPL-3.0)**. See the [LICENSE](./LICENSE) file for details.

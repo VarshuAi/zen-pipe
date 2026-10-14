@@ -1,0 +1,9 @@
+.git
+.github
+node_modules
+*.log
+.gemini
+test
+fluxa
+.DS_Store
+Thumbs.db

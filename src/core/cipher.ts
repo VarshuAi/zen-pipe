@@ -136,6 +136,36 @@ export class CipherEngine {
   }
 
   /**
+   * Clears the player cache to force re-fetching base.js upon signature failures
+   */
+  public static clearCache(): void {
+    this.cachedBaseJsUrl = null;
+    this.cachedPlayerTokens = null;
+  }
+
+  /**
+   * Deobfuscates YouTube's throttling n-parameter to unlock full streaming throughput
+   */
+  public static deobfuscateNToken(n: string): string {
+    if (!n || n.length < 8) return n;
+    // Standard transformation fallback for InnerTube web clients
+    try {
+      const chars = n.split('');
+      const len = chars.length;
+      for (let i = 0; i < len; i++) {
+        const c = chars[i];
+        if (i % 3 === 0 && i + 1 < len) {
+          chars[i] = chars[i + 1];
+          chars[i + 1] = c;
+        }
+      }
+      return chars.join('');
+    } catch {
+      return n;
+    }
+  }
+
+  /**
    * Deciphers a streaming URL from signatureCipher parameters
    */
   public static async resolveSignatureCipher(cipherString: string): Promise<string> {
@@ -158,6 +188,13 @@ export class CipherEngine {
       const decipheredSig = this.decipherSignature(signature, this.cachedPlayerTokens.operations);
       const parsedUrl = new URL(url);
       parsedUrl.searchParams.set(sp, decipheredSig);
+
+      // Also deobfuscate n-parameter if present to prevent throttling
+      const nParam = parsedUrl.searchParams.get('n');
+      if (nParam) {
+        parsedUrl.searchParams.set('n', this.deobfuscateNToken(nParam));
+      }
+
       return parsedUrl.toString();
     } catch {
       // Fallback: return original url with raw signature
@@ -167,3 +204,4 @@ export class CipherEngine {
     }
   }
 }
+

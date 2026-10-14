@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YouTube</title>
+  <title>ZenPipe ⚡ YouTube & Universal Stream Engine</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0f0f0f">
+  <meta name="description" content="High-performance universal streaming media engine and YouTube desktop client. Zero external npm dependencies.">
   <link rel="stylesheet" href="/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -375,10 +378,23 @@
           <div class="yt-watch-primary">
             <!-- CINEMATIC 16:9 PLAYER -->
             <div class="yt-player-container">
-              <div id="playerAmbientGlow" class="yt-ambient-glow"></div>
+              <div id="playerAmbientGlow" class="yt-ambient-glow">
+                <canvas id="ambientCanvas" class="yt-ambient-canvas" width="64" height="36"></canvas>
+              </div>
               <div class="yt-player-box">
                 <video id="mainVideo" controls playsinline></video>
                 <audio id="mainAudio"></audio>
+
+                <!-- Audio Only / Data Saver Mode Cover -->
+                <div id="audioOnlyCover" class="yt-audio-only-cover" style="display:none;">
+                  <div class="yt-audio-disc-wrap">
+                    <img id="audioOnlyThumb" class="yt-audio-disc-thumb" src="" alt="Album Art">
+                  </div>
+                  <div class="yt-audio-viz-bars">
+                    <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+                  </div>
+                  <span class="yt-audio-saver-badge">DATA SAVER • AUDIO ONLY</span>
+                </div>
 
                 <!-- Unmute Autoplay Overlay -->
                 <div id="unmuteBanner" class="yt-unmute-overlay" style="display:none;" onclick="app.unmutePlayer()">
@@ -504,11 +520,23 @@
                   </select>
                 </div>
 
+                <!-- Ambient Light, Theater & Audio Only Controls -->
+                <button id="ambientToggleBtn" class="yt-action-pill-icon active" onclick="app.toggleAmbientMode()" title="Atmospheric Ambient Backlight">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 17.93V4.07a8 8 0 0 1 0 15.86z"/></svg>
+                </button>
+                <button id="theaterBtn" class="yt-action-pill-icon" onclick="app.toggleTheaterMode()" title="Cinema Theater Mode (t)">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 6H5c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H5V8h14v8z"/></svg>
+                </button>
+                <button id="audioOnlyToggleBtn" class="yt-action-pill" onclick="app.toggleAudioOnlyMode()" title="Data Saver (Audio Only)">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                  <span id="audioOnlyToggleText">Audio</span>
+                </button>
+
                 <!-- More Tools: EQ, PiP, Bookmark, Shortcuts -->
                 <button id="eqToggleBtn" class="yt-action-pill-icon" onclick="app.toggleEqPanel()" title="Studio DSP Equalizer">
                   <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M10 20h4V4h-4v16zm-6 0h4v-8H4v8zM16 9v11h4V9h-4z"/></svg>
                 </button>
-                <button id="pipBtn" class="yt-action-pill-icon" onclick="app.togglePip()" title="Picture-in-Picture">
+                <button id="pipBtn" class="yt-action-pill-icon" onclick="app.togglePip()" title="Picture-in-Picture (p)">
                   <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 7h-8v6h8V7zm2-4H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16.01H3V4.99h18v14.02z"/></svg>
                 </button>
                 <button id="bookmarkBtn" class="yt-action-pill-icon" onclick="app.toggleBookmark()" title="Bookmark">
@@ -950,6 +978,9 @@
           <div class="yt-shortcut-row"><span>Mute / Unmute</span><div><kbd>m</kbd></div></div>
           <div class="yt-shortcut-row"><span>Toggle Fullscreen</span><div><kbd>f</kbd></div></div>
           <div class="yt-shortcut-row"><span>Picture-in-Picture</span><div><kbd>p</kbd></div></div>
+          <div class="yt-shortcut-row"><span>Cinema Theater Mode</span><div><kbd>t</kbd></div></div>
+          <div class="yt-shortcut-row"><span>Atmospheric Ambient Backlight</span><div><kbd>a</kbd></div></div>
+          <div class="yt-shortcut-row"><span>Audio Only / Data Saver</span><div><kbd>q</kbd></div></div>
           <div class="yt-shortcut-row"><span>Set A Loop Point</span><div><kbd>[</kbd></div></div>
           <div class="yt-shortcut-row"><span>Set B Loop Point</span><div><kbd>]</kbd></div></div>
           <div class="yt-shortcut-row"><span>Toggle A-B Repeat</span><div><kbd>\</kbd></div></div>
@@ -962,5 +993,12 @@
   </div>
 
   <script src="/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>

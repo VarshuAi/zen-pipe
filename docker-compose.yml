@@ -1,0 +1,18 @@
+services:
+  zen-pipe:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: zen-pipe:latest
+    container_name: zenpipe
+    restart: unless-stopped
+    ports:
+      - "3333:3333"
+    environment:
+      - PORT=3333
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3333/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3

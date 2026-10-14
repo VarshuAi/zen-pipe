@@ -16,7 +16,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
-const PORT = 3333;
+const PORT = parseInt(process.env.PORT || '3333', 10);
 
 const MIME_TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -41,6 +41,18 @@ async function handleApi(req: http.IncomingMessage, res: http.ServerResponse, pa
   }
 
   try {
+    if (pathname === '/health' || pathname === '/api/health') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        status: 'healthy',
+        service: 'zen-pipe',
+        version: '1.0.0',
+        uptime: Math.round(process.uptime()),
+        timestamp: new Date().toISOString()
+      }));
+      return;
+    }
+
     if (pathname === '/api/stream') {
       const id = searchParams.get('id');
       if (!id) {
@@ -527,7 +539,7 @@ const server = http.createServer(async (req, res) => {
   const parsedUrl = new URL(req.url || '/', `http://${req.headers.host}`);
   const pathname = parsedUrl.pathname;
 
-  if (pathname.startsWith('/api/')) {
+  if (pathname.startsWith('/api/') || pathname === '/health') {
     await handleApi(req, res, pathname, parsedUrl.searchParams);
     return;
   }
