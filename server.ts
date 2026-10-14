@@ -10,7 +10,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { Readable } from 'node:stream';
-import { ZenTube, StreamMuxer } from './src/index.ts';
+import { ZenTube, StreamMuxer, HttpClient, InnerTubeClient } from './src/index.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -63,6 +63,43 @@ async function handleApi(req: http.IncomingMessage, res: http.ServerResponse, pa
       const data = await ZenTube.getStreamWithFallback(id);
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(data));
+      return;
+    }
+
+    if (pathname === '/api/debug-player') {
+      const id = searchParams.get('id') || 'jNQXAC9IVRw';
+      const visitorData = await HttpClient.getVisitorData();
+      const results: any = {};
+      
+      const testClients = [
+        { name: 'VISIONOS', ctx: InnerTubeClient.createVisionOsContext(visitorData), headers: InnerTubeClient.getVisionOsHeaders(), ep: `${InnerTubeClient.ENDPOINTS.PLAYER}?prettyPrint=false&id=${id}` },
+        { name: 'ANDROID', ctx: InnerTubeClient.createAndroidContext(visitorData), headers: InnerTubeClient.getAndroidHeaders(), ep: `${InnerTubeClient.ENDPOINTS.PLAYER}?prettyPrint=false&id=${id}` },
+        { name: 'IOS', ctx: InnerTubeClient.createIosContext(visitorData), headers: InnerTubeClient.getIosHeaders(), ep: `${InnerTubeClient.ENDPOINTS.PLAYER}?prettyPrint=false&id=${id}` },
+        { name: 'WEB', ctx: InnerTubeClient.createWebContext(visitorData), headers: InnerTubeClient.getWebHeaders(), ep: `${InnerTubeClient.ENDPOINTS.WEB_PLAYER}?prettyPrint=false` },
+      ];
+
+      for (const c of testClients) {
+        try {
+          const body = InnerTubeClient.preparePlayerBody(id, c.ctx);
+          const data = await HttpClient.postJson(c.ep, body, { headers: c.headers });
+          results[c.name] = {
+            status: data.playabilityStatus?.status,
+            reason: data.playabilityStatus?.reason,
+            formatsCount: data.streamingData?.formats?.length || 0,
+            adaptiveCount: data.streamingData?.adaptiveFormats?.length || 0,
+            formatsWithUrl: (data.streamingData?.formats || []).filter((f: any) => Boolean(f.url)).length,
+            adaptiveWithUrl: (data.streamingData?.adaptiveFormats || []).filter((f: any) => Boolean(f.url)).length,
+            hasHls: Boolean(data.streamingData?.hlsManifestUrl),
+            hasDash: Boolean(data.streamingData?.dashManifestUrl),
+            hasSabr: Boolean(data.streamingData?.serverAbrStreamingUrl),
+          };
+        } catch (e: any) {
+          results[c.name] = { error: e.message };
+        }
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(results, null, 2));
       return;
     }
 
