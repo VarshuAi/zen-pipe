@@ -181,6 +181,10 @@ class ZenTubeApp {
           else c.classList.remove('active');
         });
 
+        if (window.innerWidth <= 768) {
+          this.closeMobileSidebar();
+        }
+
         if (action === 'trending') {
           this.loadTrending();
           return;
@@ -408,8 +412,39 @@ class ZenTubeApp {
   toggleSidebar() {
     const sidebar = document.getElementById('appSidebar');
     const viewport = document.getElementById('mainViewport');
-    if (sidebar) sidebar.classList.toggle('collapsed');
-    if (viewport) viewport.classList.toggle('guide-collapsed');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (window.innerWidth <= 768) {
+      if (sidebar) {
+        const isOpen = sidebar.classList.toggle('mobile-open');
+        if (backdrop) backdrop.classList.toggle('active', isOpen);
+      }
+    } else {
+      if (sidebar) sidebar.classList.toggle('collapsed');
+      if (viewport) viewport.classList.toggle('guide-collapsed');
+    }
+  }
+
+  closeMobileSidebar() {
+    const sidebar = document.getElementById('appSidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    if (sidebar) sidebar.classList.remove('mobile-open');
+    if (backdrop) backdrop.classList.remove('active');
+  }
+
+  openMobileSearch() {
+    const masthead = document.querySelector('.yt-masthead');
+    if (masthead) masthead.classList.add('mobile-search-active');
+    const input = document.getElementById('searchInput');
+    if (input) {
+      input.focus();
+    }
+  }
+
+  closeMobileSearch() {
+    const masthead = document.querySelector('.yt-masthead');
+    if (masthead) masthead.classList.remove('mobile-search-active');
+    const suggestions = document.getElementById('suggestionsBox');
+    if (suggestions) suggestions.style.display = 'none';
   }
 
   
@@ -627,6 +662,7 @@ class ZenTubeApp {
   }
 
   triggerSearch() {
+    this.closeMobileSearch();
     const raw = this.searchInput.value.trim();
     if (!raw) return;
 

@@ -2671,3 +2671,531 @@ kbd {
   }
 }
 
+/* ==========================================================================
+   AUTHENTIC MOBILE RESPONSIVE ENGINE (YouTube Mobile Web Parity)
+   ========================================================================== */
+
+/* Mobile Bottom Navigation Bar (YouTube Mobile Tab Bar) */
+.yt-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  background: var(--yt-spec-base-background);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  z-index: 1001;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 4px;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  backdrop-filter: blur(8px);
+}
+
+.yt-bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: var(--yt-spec-text-secondary);
+  font-family: var(--yt-font-family);
+  font-size: 10px;
+  font-weight: 500;
+  gap: 3px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.yt-bottom-nav-item svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+  transition: transform 0.15s ease;
+}
+
+.yt-bottom-nav-item.active {
+  color: #ffffff;
+}
+
+.yt-bottom-nav-item.active svg {
+  fill: #ffffff;
+  transform: scale(1.05);
+}
+
+.yt-bottom-nav-item:active {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+/* Off-Canvas Backdrop Overlay for Mobile Guide Drawer */
+.yt-sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(3px);
+  z-index: 1150;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.yt-sidebar-backdrop.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Mobile Search Toggle & Back Buttons */
+.yt-mobile-search-btn,
+.yt-mobile-search-back-btn {
+  display: none;
+}
+
+/* ==========================================================================
+   TABLET & MOBILE BREAKPOINTS (<= 1024px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .yt-watch-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .yt-watch-primary {
+    width: 100%;
+  }
+  .yt-watch-secondary {
+    width: 100%;
+  }
+}
+
+/* ==========================================================================
+   MOBILE PHONES & SMALL TABLETS (<= 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Show Mobile Bottom Navigation */
+  .yt-bottom-nav {
+    display: flex;
+  }
+
+  /* Full Width Content Viewport without Sidebar Margin */
+  .yt-content-viewport {
+    margin-left: 0 !important;
+    padding: 0 12px 76px 12px;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  /* Off-Canvas Mobile Drawer Sidebar */
+  .yt-guide-sidebar {
+    transform: translateX(-100%);
+    width: 260px;
+    z-index: 1200;
+    box-shadow: 4px 0 28px rgba(0, 0, 0, 0.85);
+    transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .yt-guide-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  /* Header / Masthead Compact Layout */
+  .yt-masthead {
+    padding: 0 10px;
+  }
+
+  .yt-masthead-start {
+    flex: 0 0 auto;
+    gap: 8px;
+  }
+
+  .yt-logo-wrap {
+    gap: 2px;
+  }
+
+  .yt-logo-svg {
+    width: 80px;
+    height: 18px;
+  }
+
+  .yt-country-badge {
+    font-size: 9px;
+  }
+
+  /* Hide Center Search by Default on Mobile */
+  .yt-masthead-center {
+    display: none;
+  }
+
+  /* Mobile Search Open Button in Masthead End */
+  .yt-mobile-search-btn {
+    display: inline-flex;
+  }
+
+  .yt-shortcuts-btn {
+    display: none;
+  }
+
+  #mirrorStatusText {
+    display: none;
+  }
+
+  #mirrorStatusBtn {
+    padding: 0 8px;
+    height: 36px;
+  }
+
+  .yt-masthead-end {
+    gap: 2px;
+  }
+
+  /* Mobile Search Overlay Full-Width Mode */
+  .yt-masthead.mobile-search-active .yt-masthead-start,
+  .yt-masthead.mobile-search-active .yt-masthead-end {
+    display: none;
+  }
+
+  .yt-masthead.mobile-search-active .yt-masthead-center {
+    display: flex !important;
+    flex: 1 1 100%;
+    margin: 0;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .yt-masthead.mobile-search-active .yt-mobile-search-back-btn {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  .yt-masthead.mobile-search-active .yt-search-form {
+    max-width: 100%;
+    flex: 1;
+  }
+
+  .yt-masthead.mobile-search-active .yt-search-box {
+    height: 38px;
+    border-radius: 20px 0 0 20px;
+    padding: 0 12px;
+  }
+
+  .yt-masthead.mobile-search-active .yt-search-submit-btn {
+    height: 38px;
+    width: 48px;
+    border-radius: 0 20px 20px 0;
+  }
+
+  .yt-masthead.mobile-search-active #suggestionsBox {
+    position: fixed;
+    top: var(--yt-masthead-height);
+    left: 0;
+    right: 0;
+    width: 100%;
+    border-radius: 0 0 12px 12px;
+    max-height: 65vh;
+    z-index: 1002;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85);
+  }
+
+  /* Horizontal Filter Chips */
+  .yt-chips-container {
+    padding: 8px 0;
+    margin-bottom: 4px;
+    top: var(--yt-masthead-height);
+  }
+
+  .yt-chip {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  /* Video Watch Page Mobile Optimization */
+  .yt-player-container {
+    border-radius: 0;
+    margin-left: -12px;
+    margin-right: -12px;
+    width: calc(100% + 24px);
+    aspect-ratio: 16 / 9;
+  }
+
+  .yt-ambient-glow {
+    display: none; /* Conserve mobile GPU/battery */
+  }
+
+  .yt-watch-title {
+    font-size: 16px;
+    line-height: 22px;
+    margin: 10px 0 6px;
+  }
+
+  .yt-owner-action-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .yt-owner-left {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .yt-channel-owner-group {
+    gap: 10px;
+  }
+
+  .yt-owner-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .yt-owner-name {
+    font-size: 14px;
+  }
+
+  .yt-subscribe-btn {
+    height: 34px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+
+  /* Swipeable Horizontal Action Pills Rail */
+  .yt-action-pills-group {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 8px;
+    padding-bottom: 6px;
+    width: 100%;
+  }
+
+  .yt-action-pills-group::-webkit-scrollbar {
+    display: none;
+  }
+
+  .yt-action-pill {
+    flex-shrink: 0;
+    font-size: 13px;
+    height: 34px;
+    padding: 0 12px;
+  }
+
+  .yt-segmented-pill {
+    flex-shrink: 0;
+    height: 34px;
+  }
+
+  .yt-segment-btn {
+    font-size: 13px;
+  }
+
+  .yt-watch-details-box {
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+
+  /* Floating Mini-Player on Mobile (Docked above Bottom Nav) */
+  .yt-mini-player {
+    bottom: 58px;
+    right: 8px;
+    left: 8px;
+    width: auto;
+    max-width: calc(100vw - 16px);
+    border-radius: 8px;
+    padding: 6px 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+  }
+
+  /* Slide-Up Bottom-Sheet Playback Queue Drawer */
+  .yt-queue-drawer {
+    top: auto;
+    bottom: 52px;
+    right: 0;
+    left: 0;
+    width: 100%;
+    max-height: 65vh;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.85);
+    transform: translateY(100%);
+    transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  .yt-queue-drawer.open {
+    transform: translateY(0);
+  }
+
+  /* Channel View Mobile Optimization */
+  .yt-channel-banner-img {
+    height: 110px;
+    border-radius: 0;
+    margin-left: -12px;
+    margin-right: -12px;
+    width: calc(100% + 24px);
+  }
+
+  .yt-channel-header-row {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 0;
+  }
+
+  .yt-channel-hero-avatar {
+    width: 72px;
+    height: 72px;
+  }
+
+  .yt-channel-title-text {
+    font-size: 18px;
+  }
+
+  .yt-channel-tabs-row {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 16px;
+    padding: 0 4px;
+  }
+
+  .yt-channel-tabs-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Playlist View Mobile Optimization */
+  .yt-playlist-hero {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 16px;
+    margin-left: -12px;
+    margin-right: -12px;
+    border-radius: 0;
+  }
+
+  .yt-playlist-thumb {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  /* Section Headers & Actions Stack */
+  .yt-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .yt-section-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  /* Shorts View Mobile Parity */
+  .yt-shorts-reel-container {
+    width: 100%;
+    justify-content: center;
+    gap: 0;
+    max-height: calc(100vh - 110px);
+  }
+
+  .yt-shorts-player-box {
+    width: 100%;
+    max-width: 100vw;
+    height: calc(100vh - 110px);
+    max-height: calc(100vh - 110px);
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .yt-shorts-action-rail {
+    position: absolute;
+    right: 8px;
+    bottom: 24px;
+    z-index: 10;
+    gap: 10px;
+  }
+
+  .yt-shorts-nav-group {
+    display: none;
+  }
+
+  .yt-shorts-bottom-overlay {
+    padding: 12px;
+    width: calc(100% - 60px);
+  }
+}
+
+/* ==========================================================================
+   EXTRA SMALL SCREENS (<= 600px)
+   Single-Column Pure Mobile Video Feed
+   ========================================================================== */
+@media (max-width: 600px) {
+  .yt-video-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    row-gap: 24px;
+  }
+
+  .video-card .thumb-container {
+    border-radius: 8px;
+  }
+
+  .card-details {
+    padding: 8px 2px 0 2px;
+    gap: 10px;
+  }
+
+  .card-title {
+    font-size: 14px;
+    line-height: 19px;
+  }
+
+  /* Mobile Bottom-Sheet Modal Dialogs */
+  .yt-modal-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .yt-modal-card {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 16px 16px 0 0;
+    border-bottom: none;
+    overflow-y: auto;
+  }
+
+  .yt-modal-card.wide {
+    max-width: 100%;
+  }
+
+  .yt-modal-header {
+    padding: 14px 16px;
+  }
+
+  .yt-modal-body {
+    padding: 16px;
+  }
+}
+
+/* ==========================================================================
+   MEDIUM TABLET ADJUSTMENT (601px - 960px)
+   ========================================================================== */
+@media (min-width: 601px) and (max-width: 960px) {
+  .yt-video-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    row-gap: 28px;
+  }
+}
+
+
